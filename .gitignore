@@ -1,0 +1,6 @@
+node_modules/
+*.log
+.DS_Store
+
+# dist/ 故意不忽略：仓库里带上构建产物，
+# 这样 `npm i github:...` 和 jsDelivr 直引都不用先构建
