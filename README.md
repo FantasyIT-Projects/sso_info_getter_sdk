@@ -2,7 +2,7 @@
 
 OIDC 单点登录浏览器 SDK：在用户点击里拉起一个登录窗口，登录完成后通过 `postMessage` 取回用户信息。
 
-- 产物：单个 ESM 文件 `dist/index.js`（约 11 KB），**零运行时依赖**
+- 产物：单个 ESM 文件 `dist/index.js`（约 11 KB），**零运行时依赖**、**无安装脚本**（`dist/` 随仓库发布）
 - 导出：`getUserInfoSSO(): Promise<{ username: string; preferName: string; avatar: string }>`
 - 自带 TypeScript 类型（`dist/index.d.ts`）
 
@@ -12,7 +12,7 @@ OIDC 单点登录浏览器 SDK：在用户点击里拉起一个登录窗口，�
     npm i ../sso_info/packages/sdk
     npm i ./sso-info-sdk-0.2.0.tgz
 
-    # GitHub（仓库根就是这个包时；prepare 会自动构建）
+    # GitHub（仓库里已带 dist，装的时候不需要构建）
     npm i github:you/sso-info-sdk
     npm i github:you/sso-info-sdk#v0.2.0
 
