@@ -4,7 +4,7 @@
  * 浏览器端 OIDC 单点登录 SDK。
  *
  *   import { configureSSO, getUserInfoSSO } from '@sso-info/sdk'
- *   configureSSO({ serverUrl: 'https://sso.example.com', clientId: 'my-app' })
+ *   configureSSO({ serverUrl: 'https://sso.example.com' })
  *   const { username, preferName, avatar } = await getUserInfoSSO()
  *
  * 工作方式：在用户点击的同步调用栈里拉起一个新窗口，指向 SSO 服务器的 /authorize 页面；
@@ -21,8 +21,6 @@ export interface UserInfo {
 export interface SSOConfig {
     /** SSO 服务器地址（绝对地址，http/https），例如 https://sso.example.com */
     serverUrl: string;
-    /** 在 SSO 服务器上注册的客户端 ID */
-    clientId: string;
     /** 等待登录完成的最长时间，默认 5 分钟 */
     timeoutMs: number;
     /** window.open 的窗口特性字符串 */

@@ -4,7 +4,7 @@
  * 浏览器端 OIDC 单点登录 SDK。
  *
  *   import { configureSSO, getUserInfoSSO } from '@sso-info/sdk'
- *   configureSSO({ serverUrl: 'https://sso.example.com', clientId: 'my-app' })
+ *   configureSSO({ serverUrl: 'https://sso.example.com' })
  *   const { username, preferName, avatar } = await getUserInfoSSO()
  *
  * 工作方式：在用户点击的同步调用栈里拉起一个新窗口，指向 SSO 服务器的 /authorize 页面；
@@ -66,11 +66,7 @@ function startSSO(options) {
     }
     const serverOrigin = new URL(config.serverUrl).origin;
     const nonce = randomToken();
-    const authorizeUrl = buildAuthorizeUrl(config.serverUrl, {
-        clientId: config.clientId,
-        origin,
-        nonce
-    });
+    const authorizeUrl = buildAuthorizeUrl(config.serverUrl, { origin, nonce });
     let popup;
     try {
         // 注意：不能加 noopener，否则拿不到 window.opener，也就收不到回传消息。
@@ -174,11 +170,7 @@ function resolveConfig(options) {
     const merged = { ...readInlineConfig(), ...runtimeConfig, ...omitUndefined(options) };
     const serverUrl = typeof merged.serverUrl === 'string' ? merged.serverUrl.trim() : '';
     if (serverUrl === '') {
-        throw new SSOError('config_invalid', '缺少 serverUrl：请先调用 configureSSO({ serverUrl, clientId })，或在 <script data-sso-server="https://..."> 上声明');
-    }
-    const clientId = typeof merged.clientId === 'string' ? merged.clientId.trim() : '';
-    if (clientId === '') {
-        throw new SSOError('config_invalid', '缺少 clientId：请先调用 configureSSO({ serverUrl, clientId })');
+        throw new SSOError('config_invalid', '缺少 serverUrl：请先调用 configureSSO({ serverUrl })，或在 <script data-sso-server="https://..."> 上声明');
     }
     let parsed;
     try {
@@ -196,7 +188,7 @@ function resolveConfig(options) {
     const popupFeatures = typeof merged.popupFeatures === 'string' && merged.popupFeatures !== ''
         ? merged.popupFeatures
         : DEFAULT_POPUP_FEATURES;
-    return { serverUrl: stripTrailingSlash(serverUrl), clientId, timeoutMs, popupFeatures };
+    return { serverUrl: stripTrailingSlash(serverUrl), timeoutMs, popupFeatures };
 }
 /** 支持三种配置来源：data-* 属性、globalThis.__SSO_INFO_CONFIG__、configureSSO()。 */
 function readInlineConfig() {
@@ -209,18 +201,14 @@ function readInlineConfig() {
         const element = document.querySelector('script[data-sso-server]');
         if (element !== null) {
             const serverUrl = element.getAttribute('data-sso-server');
-            const clientId = element.getAttribute('data-sso-client-id');
             if (serverUrl !== null && serverUrl !== '')
                 config.serverUrl = serverUrl;
-            if (clientId !== null && clientId !== '')
-                config.clientId = clientId;
         }
     }
     return config;
 }
 function buildAuthorizeUrl(serverUrl, params) {
     const url = new URL(`${serverUrl}/authorize`);
-    url.searchParams.set('client_id', params.clientId);
     url.searchParams.set('origin', params.origin);
     url.searchParams.set('nonce', params.nonce);
     return url.toString();
@@ -239,8 +227,6 @@ function omitUndefined(options) {
     const result = {};
     if (options.serverUrl !== undefined)
         result.serverUrl = options.serverUrl;
-    if (options.clientId !== undefined)
-        result.clientId = options.clientId;
     if (options.timeoutMs !== undefined)
         result.timeoutMs = options.timeoutMs;
     if (options.popupFeatures !== undefined)

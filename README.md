@@ -23,7 +23,7 @@ OIDC 单点登录浏览器 SDK：在用户点击里拉起一个登录窗口，�
 
     import { configureSSO, getUserInfoSSO, SSOError } from "@sso-info/sdk"
 
-    configureSSO({ serverUrl: "https://sso.example.com", clientId: "my-app" })
+    configureSSO({ serverUrl: "https://sso.example.com" })
 
     document.querySelector("#login").addEventListener("click", async () => {
       try {
@@ -55,17 +55,16 @@ React 里同样，只是把调用放进 `onClick`：
 | 选项 | 默认 | 说明 |
 | --- | --- | --- |
 | `serverUrl` | 必填 | SSO 服务端地址（绝对 http(s) 地址） |
-| `clientId` | 必填 | 服务端注册的 clientId |
 | `timeoutMs` | 5 分钟 | 等待登录完成的最长时间 |
 | `popupFeatures` | 见源码 | `window.open` 特性串（窗口大小 / 位置） |
 
-配置优先级（低 → 高）：`<script data-sso-server data-sso-client-id>` → `globalThis.__SSO_INFO_CONFIG__` → `configureSSO()` → `getUserInfoSSO({...})`。
+配置优先级（低 → 高）：`<script data-sso-server>` → `globalThis.__SSO_INFO_CONFIG__` → `configureSSO()` → `getUserInfoSSO({...})`。
 
 ## 错误码
 
 | code | 原因 |
 | --- | --- |
-| `config_invalid` | 缺 `serverUrl` / `clientId`，或地址不合法 |
+| `config_invalid` | 缺 `serverUrl` 或地址不合法 |
 | `popup_blocked` | 调用前有 await / setTimeout，丢了用户手势，或被浏览器拦截 |
 | `invalid_origin` | 页面 origin 为 null（`file://` 或沙箱 iframe） |
 | `popup_closed` | 用户中途关窗 |
@@ -78,7 +77,7 @@ React 里同样，只是把调用放进 `onClick`：
 
 1. **必须在用户点击的同步调用栈里调用**，否则弹窗被拦截（`popup_blocked`）。
 2. 调用页面必须是 http(s)：`file://` 的 origin 是 `null`，直接报 `invalid_origin`。
-3. 调用页面的 **origin 必须在服务端白名单里**（服务端 `data/apps.json` 或 `SSO_APPS`），否则弹窗里显示错误页，promise 直到关窗或超时才 reject。
+3. 调用页面的 **origin 必须在服务端白名单里**（服务端 `data/origins.json` 或 `SSO_ORIGINS`），否则弹窗里显示错误页，promise 直到关窗或超时才 reject。
 4. 不要给弹窗加 `noopener` —— SDK 依赖 `window.opener` 回传结果。
 5. 跨域 ESM 直引（SSO 服务端的 `/sdk.js` 或 CDN）时响应必须带 `Access-Control-Allow-Origin`，因为 ES module 请求一定是 CORS 模式。
 6. SDK 不做任何网络请求，因此不需要配 CORS；它只用 `window.open` + `addEventListener("message")`。
@@ -87,13 +86,13 @@ React 里同样，只是把调用放进 `onClick`：
 
 成功：
 
-    { "type": "sso-info:user-info", "nonce": "...", "clientId": "my-app",
+    { "type": "sso-info:user-info", "nonce": "...",
       "user": { "username": "alice", "preferName": "张爱丽", "avatar": "https://.../avatars/alice.svg" },
       "issuedAt": 1730000000000 }
 
 失败：
 
-    { "type": "sso-info:error", "nonce": "...", "clientId": "my-app",
+    { "type": "sso-info:error", "nonce": "...",
       "code": "access_denied", "message": "用户取消了登录" }
 
 SDK 只接受同时满足 `event.origin === serverUrl 的 origin`、`event.source === 自己打开的窗口`、`nonce` 匹配的消息。

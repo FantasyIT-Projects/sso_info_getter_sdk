@@ -1,6 +1,6 @@
 {
   "name": "@sso-info/sdk",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "OIDC 单点登录浏览器 SDK：弹出窗口登录并通过 postMessage 取回用户信息（零依赖）",
   "type": "module",
   "main": "./dist/index.js",

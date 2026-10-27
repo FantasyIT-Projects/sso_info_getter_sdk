@@ -4,7 +4,7 @@
  * 浏览器端 OIDC 单点登录 SDK。
  *
  *   import { configureSSO, getUserInfoSSO } from '@sso-info/sdk'
- *   configureSSO({ serverUrl: 'https://sso.example.com', clientId: 'my-app' })
+ *   configureSSO({ serverUrl: 'https://sso.example.com' })
  *   const { username, preferName, avatar } = await getUserInfoSSO()
  *
  * 工作方式：在用户点击的同步调用栈里拉起一个新窗口，指向 SSO 服务器的 /authorize 页面；
@@ -23,8 +23,6 @@ export interface UserInfo {
 export interface SSOConfig {
   /** SSO 服务器地址（绝对地址，http/https），例如 https://sso.example.com */
   serverUrl: string
-  /** 在 SSO 服务器上注册的客户端 ID */
-  clientId: string
   /** 等待登录完成的最长时间，默认 5 分钟 */
   timeoutMs: number
   /** window.open 的窗口特性字符串 */
@@ -117,11 +115,7 @@ function startSSO(options: SSOOptions): Promise<UserInfo> {
 
   const serverOrigin = new URL(config.serverUrl).origin
   const nonce = randomToken()
-  const authorizeUrl = buildAuthorizeUrl(config.serverUrl, {
-    clientId: config.clientId,
-    origin,
-    nonce
-  })
+  const authorizeUrl = buildAuthorizeUrl(config.serverUrl, { origin, nonce })
 
   let popup: Window | null
   try {
@@ -238,13 +232,8 @@ function resolveConfig(options: SSOOptions): SSOConfig {
   if (serverUrl === '') {
     throw new SSOError(
       'config_invalid',
-      '缺少 serverUrl：请先调用 configureSSO({ serverUrl, clientId })，或在 <script data-sso-server="https://..."> 上声明'
+      '缺少 serverUrl：请先调用 configureSSO({ serverUrl })，或在 <script data-sso-server="https://..."> 上声明'
     )
-  }
-
-  const clientId = typeof merged.clientId === 'string' ? merged.clientId.trim() : ''
-  if (clientId === '') {
-    throw new SSOError('config_invalid', '缺少 clientId：请先调用 configureSSO({ serverUrl, clientId })')
   }
 
   let parsed: URL
@@ -267,7 +256,7 @@ function resolveConfig(options: SSOOptions): SSOConfig {
       ? merged.popupFeatures
       : DEFAULT_POPUP_FEATURES
 
-  return { serverUrl: stripTrailingSlash(serverUrl), clientId, timeoutMs, popupFeatures }
+  return { serverUrl: stripTrailingSlash(serverUrl), timeoutMs, popupFeatures }
 }
 
 /** 支持三种配置来源：data-* 属性、globalThis.__SSO_INFO_CONFIG__、configureSSO()。 */
@@ -283,18 +272,15 @@ function readInlineConfig(): SSOOptions {
     const element = document.querySelector('script[data-sso-server]')
     if (element !== null) {
       const serverUrl = element.getAttribute('data-sso-server')
-      const clientId = element.getAttribute('data-sso-client-id')
       if (serverUrl !== null && serverUrl !== '') config.serverUrl = serverUrl
-      if (clientId !== null && clientId !== '') config.clientId = clientId
     }
   }
 
   return config
 }
 
-function buildAuthorizeUrl(serverUrl: string, params: { clientId: string; origin: string; nonce: string }): string {
+function buildAuthorizeUrl(serverUrl: string, params: { origin: string; nonce: string }): string {
   const url = new URL(`${serverUrl}/authorize`)
-  url.searchParams.set('client_id', params.clientId)
   url.searchParams.set('origin', params.origin)
   url.searchParams.set('nonce', params.nonce)
   return url.toString()
@@ -312,7 +298,6 @@ function parseUserInfo(value: unknown): UserInfo | null {
 function omitUndefined(options: SSOOptions): SSOOptions {
   const result: SSOOptions = {}
   if (options.serverUrl !== undefined) result.serverUrl = options.serverUrl
-  if (options.clientId !== undefined) result.clientId = options.clientId
   if (options.timeoutMs !== undefined) result.timeoutMs = options.timeoutMs
   if (options.popupFeatures !== undefined) result.popupFeatures = options.popupFeatures
   return result
