@@ -97,6 +97,8 @@ React 里同样，只是把调用放进 `onClick`：
 
 SDK 只接受同时满足 `event.origin === serverUrl 的 origin`、`event.source === 自己打开的窗口`、`nonce` 匹配的消息。
 
+**失败时不会自动关窗**：弹窗会停在结果页显示错误码与原因，方便排查；只有登录成功才自动关闭（服务端下发 `autoClose` 控制）。
+
 ## 构建
 
     npm install     # 会顺带跑 prepare -> build

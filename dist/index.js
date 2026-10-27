@@ -117,7 +117,7 @@ function startSSO(options) {
                 return;
             settled = true;
             cleanup();
-            closePopup();
+            // 失败时不主动关窗：弹窗里的错误页是排查问题的唯一线索，留给用户自己关
             reject(error);
         }
         function onMessage(event) {
@@ -147,7 +147,8 @@ function startSSO(options) {
                 const message = typeof data['message'] === 'string' && data['message'] !== ''
                     ? data['message']
                     : `OIDC 登录失败（${code}）`;
-                fail(new SSOError(code === 'access_denied' ? 'access_denied' : 'server_error', message));
+                const mapped = code === 'access_denied' ? 'access_denied' : code === 'invalid_origin' ? 'invalid_origin' : 'server_error';
+                fail(new SSOError(mapped, message));
             }
         }
         window.addEventListener('message', onMessage);
