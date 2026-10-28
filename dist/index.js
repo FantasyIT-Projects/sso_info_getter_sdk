@@ -5,7 +5,7 @@
  *
  *   import { configureSSO, getUserInfoSSO } from '@sso-info/sdk'
  *   configureSSO({ serverUrl: 'https://sso.example.com' })
- *   const { username, preferName, avatar } = await getUserInfoSSO()
+ *   const { username, nickname, avatar } = await getUserInfoSSO()
  *
  * 工作方式：在用户点击的同步调用栈里拉起一个新窗口，指向 SSO 服务器的 /authorize 页面；
  * 服务器完成 OIDC 登录后渲染一个结果页，通过 window.opener.postMessage 把用户信息回传给本页；
@@ -220,9 +220,9 @@ function parseUserInfo(value) {
     const username = typeof value['username'] === 'string' ? value['username'].trim() : '';
     if (username === '')
         return null;
-    const rawPreferName = typeof value['preferName'] === 'string' ? value['preferName'].trim() : '';
+    const rawNickname = typeof value['nickname'] === 'string' ? value['nickname'].trim() : '';
     const avatar = typeof value['avatar'] === 'string' ? value['avatar'] : '';
-    return { username, preferName: rawPreferName === '' ? username : rawPreferName, avatar };
+    return { username, nickname: rawNickname === '' ? username : rawNickname, avatar };
 }
 function omitUndefined(options) {
     const result = {};

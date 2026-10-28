@@ -3,7 +3,7 @@
 OIDC 单点登录浏览器 SDK：在用户点击里拉起一个登录窗口，登录完成后通过 `postMessage` 取回用户信息。
 
 - 产物：单个 ESM 文件 `dist/index.js`（约 11 KB），**零运行时依赖**、**无安装脚本**（`dist/` 随仓库发布）
-- 导出：`getUserInfoSSO(): Promise<{ username: string; preferName: string; avatar: string }>`
+- 导出：`getUserInfoSSO(): Promise<{ username: string; nickname: string; avatar: string }>`
 - 自带 TypeScript 类型（`dist/index.d.ts`）
 
 ## 安装
@@ -27,8 +27,8 @@ OIDC 单点登录浏览器 SDK：在用户点击里拉起一个登录窗口，�
 
     document.querySelector("#login").addEventListener("click", async () => {
       try {
-        const { username, preferName, avatar } = await getUserInfoSSO()
-        render({ username, preferName, avatar })
+        const { username, nickname, avatar } = await getUserInfoSSO()
+        render({ username, nickname, avatar })
       } catch (error) {
         if (error instanceof SSOError) console.error(error.code, error.message)
       }
@@ -46,7 +46,7 @@ React 里同样，只是把调用放进 `onClick`：
 | 导出 | 说明 |
 | --- | --- |
 | `configureSSO(options)` | 设置并合并默认配置，同步生效 |
-| `getUserInfoSSO(options?)` | 拉起登录窗口，resolve `{ username, preferName, avatar }` |
+| `getUserInfoSSO(options?)` | 拉起登录窗口，resolve `{ username, nickname, avatar }` |
 | `isSupported()` | 当前环境是否可用（SSR / 非浏览器返回 false） |
 | `SSOError` | 带稳定 `code` 的错误类 |
 | `UserInfo` / `SSOConfig` / `SSOOptions` / `SSOErrorCode` | TS 类型 |
@@ -87,7 +87,7 @@ React 里同样，只是把调用放进 `onClick`：
 成功：
 
     { "type": "sso-info:user-info", "nonce": "...",
-      "user": { "username": "alice", "preferName": "张爱丽", "avatar": "https://.../avatars/alice.svg" },
+      "user": { "username": "alice", "nickname": "张爱丽", "avatar": "https://.../avatars/alice.svg" },
       "issuedAt": 1730000000000 }
 
 失败：
